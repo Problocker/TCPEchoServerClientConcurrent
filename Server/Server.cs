@@ -4,6 +4,8 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EchoServer
 {
@@ -11,7 +13,7 @@ namespace EchoServer
     {
         public void Start()
         {
-            //opret server
+            //Opret server.
             TcpListener server = new TcpListener(IPAddress.Loopback, 7);
             server.Start();
 
@@ -19,7 +21,14 @@ namespace EchoServer
             {
                 //Venter på at klienten skal lave et opkld. 
                 TcpClient socket = server.AcceptTcpClient();
-                DoClient(socket);
+
+                //Starter ny tråd.
+                //Indsætter delegate metode.
+                Task.Run(() =>
+                {
+                    TcpClient tempSocket = socket;
+                    DoClient(tempSocket);
+                });
             }
             //socket.Close();
         }
@@ -33,8 +42,9 @@ namespace EchoServer
 
             //Læser tekst fra klienten 
             String str = sr.ReadLine();
+            Thread.Sleep(5000);
             Console.WriteLine($"Serverinput: {str}");
-            stw.WriteLine("WordCount: " + WordCount(str));
+            stw.WriteLine("AntalOrd: " + WordCount(str));
 
 
             //Skriver tilbage fra klienten.
